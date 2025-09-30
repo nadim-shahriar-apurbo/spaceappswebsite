@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, Heart } from 'lucide-react';
+import { ChevronRight, Heart, Sparkles, X } from 'lucide-react';
 
 interface LandingPageProps {
   onNext: () => void;
+  onSkipToElements: () => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onNext }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onNext, onSkipToElements }) => {
   const [currentText, setCurrentText] = useState(0);
   const [showButton, setShowButton] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const storyTexts = [
     "My father was a fisherman. One day, he went fishing in the deep ocean.",
@@ -19,6 +23,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNext }) => {
   ];
 
   useEffect(() => {
+    // Show modal after a short delay
+    const modalTimer = setTimeout(() => {
+      setShowModal(true);
+    }, 1000);
+
     const timer = setTimeout(() => {
       if (currentText < storyTexts.length - 1) {
         setCurrentText(currentText + 1);
@@ -27,8 +36,26 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNext }) => {
       }
     }, 4000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(modalTimer);
+    };
   }, [currentText, storyTexts.length]);
+
+  const handleModalResponse = (knowsSolarWeather: boolean) => {
+    if (knowsSolarWeather) {
+      setModalMessage("Wow! Let's know more");
+    } else {
+      setModalMessage("Okay, no problem! Let's learn about solar weather");
+    }
+
+    setIsRedirecting(true);
+    
+    setTimeout(() => {
+      setShowModal(false);
+      onSkipToElements();
+    }, 2000);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative z-10">
@@ -129,6 +156,59 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNext }) => {
           )}
         </div>
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop animate-fade-in">
+          <div className="bg-black bg-opacity-90 backdrop-blur-sm rounded-2xl max-w-md w-full animate-slide-up border border-stellar-gold border-opacity-30">
+            <div className="p-8 text-center">
+              {!isRedirecting ? (
+                <>
+                  <div className="mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-r from-stellar-gold to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Sparkles className="w-8 h-8 text-black" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-4">
+                      Quick Question!
+                    </h3>
+                    <p className="text-lg text-blue-200">
+                      Do you know about solar weather?
+                    </p>
+                  </div>
+
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => handleModalResponse(true)}
+                      className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-emerald-600 hover:to-green-500 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105"
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => handleModalResponse(false)}
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-purple-600 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105"
+                    >
+                      No
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="animate-fade-in">
+                  <div className="w-16 h-16 bg-gradient-to-r from-stellar-gold to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                    <Sparkles className="w-8 h-8 text-black" />
+                  </div>
+                  <p className="text-xl text-stellar-gold font-bold mb-4">
+                    {modalMessage}
+                  </p>
+                  <div className="flex items-center justify-center space-x-2 text-blue-200">
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-stellar-gold"></div>
+                    <span>Redirecting...</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

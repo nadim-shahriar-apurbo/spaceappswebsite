@@ -23,9 +23,9 @@ function App() {
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 0:
-        return <NewLandingPage onExplore={() => navigateToPage(1)} onSkipToElements={() => navigateToPage(2)} />;
+        return <NewLandingPage onExplore={() => navigateToPage(1)} />;
       case 1:
-        return <LandingPage onNext={() => navigateToPage(2)} />;
+        return <LandingPage onNext={() => navigateToPage(2)} onSkipToElements={() => navigateToPage(2)} />;
       case 2:
         return <InteractiveSpaceWeatherElements onNext={() => navigateToPage(3)} />;
       case 3:
