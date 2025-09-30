@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import NewLandingPage from './components/NewLandingPage';
 import LandingPage from './components/LandingPage';
-import SpaceWeatherElements from './components/SpaceWeatherElements';
+import InteractiveSpaceWeatherElements from './components/InteractiveSpaceWeatherElements';
+import CharacterSelection from './components/CharacterSelection';
 import HumanImpact from './components/HumanImpact';
 import PredictionPage from './components/PredictionPage';
 import StarField from './components/StarField';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState(null);
 
   const navigateToPage = (page: number) => {
     setIsLoading(true);
@@ -19,16 +22,23 @@ function App() {
 
   const renderCurrentPage = () => {
     switch (currentPage) {
+      case 0:
+        return <NewLandingPage onExplore={() => navigateToPage(1)} onSkipToElements={() => navigateToPage(2)} />;
       case 1:
         return <LandingPage onNext={() => navigateToPage(2)} />;
       case 2:
-        return <SpaceWeatherElements onNext={() => navigateToPage(3)} />;
+        return <InteractiveSpaceWeatherElements onNext={() => navigateToPage(3)} />;
       case 3:
-        return <HumanImpact onNext={() => navigateToPage(4)} />;
+        return <CharacterSelection onCharacterSelected={(character) => {
+          setSelectedCharacter(character);
+          navigateToPage(4);
+        }} />;
       case 4:
-        return <PredictionPage onBack={() => navigateToPage(1)} />;
+        return <HumanImpact onNext={() => navigateToPage(5)} />;
+      case 5:
+        return <PredictionPage onBack={() => navigateToPage(0)} />;
       default:
-        return <LandingPage onNext={() => navigateToPage(2)} />;
+        return <NewLandingPage onExplore={() => navigateToPage(1)} onSkipToElements={() => navigateToPage(2)} />;
     }
   };
 
@@ -48,7 +58,7 @@ function App() {
       
       {/* Navigation dots */}
       <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex space-x-3">
-        {[1, 2, 3, 4].map((page) => (
+        {[0, 1, 2, 3, 4, 5].map((page) => (
           <button
             key={page}
             onClick={() => navigateToPage(page)}
